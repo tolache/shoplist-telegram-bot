@@ -1,0 +1,3 @@
+[submodule "ShopListBot/Secrets"]
+	path = ShopListBot/Secrets
+	url = https://github.com/tolache/shoplist-telegram-bot-secrets.git
