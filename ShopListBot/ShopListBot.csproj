@@ -22,7 +22,7 @@
     <None Update="Secrets\telegramBotToken.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Secrets\spreadSheetId.txt">
+    <None Update="Secrets\spreadsheetId.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Secrets\googleSheetsCredentials.json">

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace ShopListBot
 {
@@ -9,9 +8,7 @@ namespace ShopListBot
     {
         private const string TelegramBotTokenFile = @"Secrets/telegramBotToken.txt";
         private const string SpreadsheetIdFileName = @"Secrets/spreadsheetId.txt";
-
-        private readonly ILogger<SecretsLoader> _logger;
-
+        
         public string GetTelegramBotToken()
         {
             string token;
@@ -21,7 +18,8 @@ namespace ShopListBot
             }
             catch (IOException e)
             {
-                _logger.LogError("Unable to load Telegram bot token from file {File}", TelegramBotTokenFile);
+                Console.WriteLine(
+                    $"Unable to load Telegram bot token from file {TelegramBotTokenFile}. Caused by: {e.Message}");
                 throw;
             }
             
@@ -43,7 +41,7 @@ namespace ShopListBot
             }
             catch (IOException e)
             {
-                _logger.LogError("Unable to load Spreadsheet ID from file {File}", SpreadsheetIdFileName);
+                Console.WriteLine($"Unable to load Spreadsheet ID from file {SpreadsheetIdFileName}. Caused by: {e.Message}");
                 throw;
             }
 

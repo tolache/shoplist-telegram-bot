@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -13,7 +11,6 @@ namespace ShopListBot
     public class BotManager
     {
         private readonly TelegramBotClient _botClient;
-        private readonly ILogger<BotManager> _logger;
 
         public BotManager()
         {
@@ -35,7 +32,8 @@ namespace ShopListBot
 
             Message message = update.Message;
             User user = message.From;
-
+            string replyText = $"I received: {message.Text} from @{user.Username} (id:{user.Id})";
+            
             IList<IList<string>> spreadsheetData = new List<IList<string>>();
             try
             {
@@ -43,14 +41,15 @@ namespace ShopListBot
             }
             catch (Exception e)
             {
-                spreadsheetData[0][0] = e.ToString();
+                replyText = "Failed to get data from Google spreadsheet: " + e;
+                spreadsheetData = new List<IList<string>> { new List<string> { "", "" } };
             }
 
-            _logger?.LogInformation("Received message from {ChatId}", message.Chat.Id);
+            Console.WriteLine($"Received message from {message.Chat.Id}");
 
             IEnumerable<IEnumerable<KeyboardButton>> buttonBoard = new List<IEnumerable<KeyboardButton>>
             {
-                new List<KeyboardButton> {new KeyboardButton(spreadsheetData[0][0]), new KeyboardButton(spreadsheetData[0][0])},
+                new List<KeyboardButton> {new KeyboardButton(spreadsheetData[0][0]), new KeyboardButton(spreadsheetData[0][1])},
             };
             ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(buttonBoard);
 
@@ -59,8 +58,7 @@ namespace ShopListBot
                 case MessageType.Text: ;
                     await _botClient.SendTextMessageAsync(
                         chatId:message.Chat.Id,
-                        text: $"I received: {message.Text} from @{user.Username} (id:{user.Id})" + Environment.NewLine + 
-                              $"Spreadsheet data: {spreadsheetData}",
+                        text: replyText,
                         replyMarkup: keyboardMarkup);
                     break;
             }
