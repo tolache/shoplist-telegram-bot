@@ -17,7 +17,7 @@ namespace ShopListBot
 
         public SpreadsheetConnector()
         {
-            _spreadsheetId = new SecretsLoader().GetSpreadsheetId();
+            _spreadsheetId = new SecretsLoader().GetSecret(SecretType.GoogleSpreadsheetId);
             ConnectToGoogle();
         }
 

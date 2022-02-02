@@ -10,49 +10,40 @@ namespace ShopListBot
         private const string TelegramBotTokenFile = @"Secrets/telegramBotToken.txt";
         private const string SpreadsheetIdFileName = @"Secrets/spreadsheetId.txt";
         
-        public string GetTelegramBotToken()
+        public string GetSecret(SecretType secretType)
         {
-            string token;
+            string secret;
+            string secretFile = secretType switch
+            {
+                SecretType.TelegramBotToken => TelegramBotTokenFile,
+                SecretType.GoogleSpreadsheetId => SpreadsheetIdFileName,
+                _ => throw new ArgumentException($"Unknown secret type {secretType}")
+            };
+            
             try
             {
-                token = File.ReadLines(TelegramBotTokenFile).First();
+                secret = File.ReadLines(secretFile).First();
             }
             catch (IOException e)
             {
                 LambdaLogger.Log(
-                    $"Unable to load Telegram bot token from file {TelegramBotTokenFile}. Caused by: {e.Message}");
+                    $"Unable to load secret from file {secretFile}. Caused by: {e.Message}");
                 throw;
             }
             
-            if (String.IsNullOrWhiteSpace(token))
+            if (String.IsNullOrWhiteSpace(secret))
             {
                 throw new ArgumentException(
-                    $"Token is invalid. Token must be set through the '{TelegramBotTokenFile}' environment variable.",
-                    token);
+                    $"Secret is invalid. Secret must be set through the '{secretFile}' file.",
+                    secret);
             }
-            return token;
+            return secret;
         }
-        
-        public string GetSpreadsheetId()
-        {
-            string spreadsheetId;
-            try
-            {
-                spreadsheetId = File.ReadLines(SpreadsheetIdFileName).First();
-            }
-            catch (IOException e)
-            {
-                LambdaLogger.Log(
-                    $"Unable to load Spreadsheet ID from file {SpreadsheetIdFileName}. Caused by: {e.Message}");
-                throw;
-            }
+    }
 
-            if (String.IsNullOrWhiteSpace(spreadsheetId))
-            {
-                throw new ArgumentException($"Spreadsheet ID specified in file {SpreadsheetIdFileName} is invalid.",
-                    spreadsheetId);
-            }
-            return spreadsheetId;
-        }
+    public enum SecretType
+    {
+        TelegramBotToken,
+        GoogleSpreadsheetId,
     }
 }
