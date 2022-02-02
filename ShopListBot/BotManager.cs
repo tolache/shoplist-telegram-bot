@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Amazon.Lambda.Core;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -45,7 +46,7 @@ namespace ShopListBot
                 spreadsheetData = new List<IList<string>> { new List<string> { "", "" } };
             }
 
-            Console.WriteLine($"Received message from {message.Chat.Id}");
+            LambdaLogger.Log($"Received message from {message.Chat.Id}");
 
             IEnumerable<IEnumerable<KeyboardButton>> buttonBoard = new List<IEnumerable<KeyboardButton>>
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Amazon.Lambda.Core;
 
 namespace ShopListBot
 {
@@ -18,7 +19,7 @@ namespace ShopListBot
             }
             catch (IOException e)
             {
-                Console.WriteLine(
+                LambdaLogger.Log(
                     $"Unable to load Telegram bot token from file {TelegramBotTokenFile}. Caused by: {e.Message}");
                 throw;
             }
@@ -41,7 +42,8 @@ namespace ShopListBot
             }
             catch (IOException e)
             {
-                Console.WriteLine($"Unable to load Spreadsheet ID from file {SpreadsheetIdFileName}. Caused by: {e.Message}");
+                LambdaLogger.Log(
+                    $"Unable to load Spreadsheet ID from file {SpreadsheetIdFileName}. Caused by: {e.Message}");
                 throw;
             }
 
