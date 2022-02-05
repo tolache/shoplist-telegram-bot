@@ -13,6 +13,7 @@ namespace ShopListBot
         private readonly string[] _scopes = { SheetsService.Scope.Spreadsheets };
         private readonly string _applicationName = "ShopListBot";
         private readonly string _spreadsheetId;
+        private readonly CellRange _itemsLocation = new CellRange("items", "A2", "B");
         private SheetsService _sheetsService;
 
         public SpreadsheetConnector()
@@ -21,27 +22,25 @@ namespace ShopListBot
             ConnectToGoogle();
         }
 
-        public IList<IList<string>> GetData()
+        public IList<IList<object>> ReadItems()
         {
-            string range = "items!A2:B";
-            SpreadsheetsResource.ValuesResource.GetRequest request =
-                _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range);
             
-            ValueRange response = request.Execute();
-            IList<IList<object>> values = response.Values;
-            if (values != null && values.Count > 0)
+            IList<IList<object>> itemValues = ReadRange(_itemsLocation);
+            if (itemValues == null)
             {
-                List<IList<string>> result = new List<IList<string>>();
-
-                foreach (var row in values)
-                {
-                    result.Add(new List<string> {row[0].ToString(), row[1].ToString()});
-                }
-
-                return result;
+                throw new ArgumentException($"Couldn't get any data from range '{_itemsLocation}'.");
             }
 
-            throw new ArgumentException($"Couldn't get any data from range {range}", range);
+            return itemValues;
+        }
+
+        private IList<IList<object>> ReadRange(CellRange range)
+        {
+            SpreadsheetsResource.ValuesResource.GetRequest request =
+                _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range.ToString());
+            
+            ValueRange response = request.Execute();
+            return response.Values;
         }
 
         private void ConnectToGoogle()
