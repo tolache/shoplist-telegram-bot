@@ -31,11 +31,7 @@ namespace ShopListBot
             if (message == null || fromUser == null) return;
 
             LambdaLogger.Log($"Received message from {message.Chat.Id}");
-            if (String.IsNullOrWhiteSpace(fromUser.Username) || !AuthorizedUsers.Contains(fromUser.Username))
-            {
-                LambdaLogger.Log($"User '@{fromUser.Username}' is unauthorized");
-                return;
-            }
+            if (!CheckUserAuthorized(fromUser.Username)) return;
 
             string replyText = $"I received: {message.Text} from @{fromUser.Username} (id:{fromUser.Id})";
 
@@ -72,6 +68,13 @@ namespace ShopListBot
                         replyMarkup: keyboardMarkup);
                     break;
             }
+        }
+
+        private bool CheckUserAuthorized(string? username)
+        {
+            if (!String.IsNullOrWhiteSpace(username) && AuthorizedUsers.Contains(username)) return true;
+            LambdaLogger.Log($"User '@{username}' is unauthorized");
+            return false;
         }
 
         private IList<string> GetAuthorizedUsers()
