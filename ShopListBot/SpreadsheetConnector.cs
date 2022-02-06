@@ -45,12 +45,8 @@ namespace ShopListBot
 
         private void ConnectToGoogle()
         {
-            GoogleCredential credential;
-
-            using (var stream = new FileStream(@"Secrets/googleSheetsCredentials.json", FileMode.Open, FileAccess.Read))
-            {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(_scopes);
-            }
+            string credentialString = new SecretsLoader().GetSecret(SecretType.GoogleCredentials);
+            GoogleCredential credential = GoogleCredential.FromJson(credentialString).CreateScoped(_scopes);
 
             _sheetsService = new SheetsService(new BaseClientService.Initializer()
             {

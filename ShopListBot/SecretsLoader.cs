@@ -8,7 +8,8 @@ namespace ShopListBot
     public class SecretsLoader
     {
         private const string TelegramBotTokenFile = @"Secrets/telegramBotToken.txt";
-        private const string SpreadsheetIdFileName = @"Secrets/spreadsheetId.txt";
+        private const string SpreadsheetIdFile = @"Secrets/spreadsheetId.txt";
+        private const string GoogleCredentialsFile = @"Secrets/googleSheetsCredentials.json";
         
         public string GetSecret(SecretType secretType)
         {
@@ -16,13 +17,14 @@ namespace ShopListBot
             string secretFile = secretType switch
             {
                 SecretType.TelegramBotToken => TelegramBotTokenFile,
-                SecretType.GoogleSpreadsheetId => SpreadsheetIdFileName,
+                SecretType.GoogleSpreadsheetId => SpreadsheetIdFile,
+                SecretType.GoogleCredentials => GoogleCredentialsFile,
                 _ => throw new ArgumentException($"Unknown secret type {secretType}")
             };
             
             try
             {
-                secret = File.ReadLines(secretFile).First();
+                secret = File.ReadAllText(secretFile);
             }
             catch (IOException e)
             {
@@ -45,5 +47,6 @@ namespace ShopListBot
     {
         TelegramBotToken,
         GoogleSpreadsheetId,
+        GoogleCredentials,
     }
 }
