@@ -14,6 +14,8 @@ namespace ShopListBot
         private readonly TelegramBotClient _botClient;
         private ShoppingList _shopList = new ShoppingList();
 
+        private IList<string> AuthorizedUsers => GetAuthorizedUsers();
+
         public BotManager()
         {
             string token = SecretsLoader.GetSecret(SecretsLoader.SecretType.TelegramBotToken);
@@ -22,14 +24,20 @@ namespace ShopListBot
 
         public async Task RespondAsync(Update update)
         {
-            if (update == null) return;
             if (update.Type != UpdateType.Message) return;
+            
+            Message? message = update.Message;
+            User? fromUser = message?.From;
+            if (message == null || fromUser == null) return;
 
-            Message message = update.Message;
-            User user = message.From;
             LambdaLogger.Log($"Received message from {message.Chat.Id}");
+            if (String.IsNullOrWhiteSpace(fromUser.Username) || !AuthorizedUsers.Contains(fromUser.Username))
+            {
+                LambdaLogger.Log($"User '@{fromUser.Username}' is unauthorized");
+                return;
+            }
 
-            string replyText = $"I received: {message.Text} from @{user.Username} (id:{user.Id})";
+            string replyText = $"I received: {message.Text} from @{fromUser.Username} (id:{fromUser.Id})";
 
             IList<ShopListItem> items = new List<ShopListItem>();
             try
@@ -64,6 +72,23 @@ namespace ShopListBot
                         replyMarkup: keyboardMarkup);
                     break;
             }
+        }
+
+        private IList<string> GetAuthorizedUsers()
+        {
+            IList<string> authorizedUsers = new List<string>();
+            IList<IList<object>> usersValues = SpreadsheetConnector.ReadUsers();
+
+            foreach (IList<object> row in usersValues)
+            {
+                string? user = row[0].ToString();
+                if (!String.IsNullOrWhiteSpace(user))
+                {
+                    authorizedUsers.Add(user);
+                }
+            }
+
+            return authorizedUsers;
         }
     }
 }
