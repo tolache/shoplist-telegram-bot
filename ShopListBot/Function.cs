@@ -28,10 +28,13 @@ namespace ShopListBot
         public async Task<string> FunctionHandler(JObject request, ILambdaContext context)
         {
             LambdaLogger.Log("REQUEST: " + JsonConvert.SerializeObject(request));
+            Update? update = request.ToObject<Update>();
             try
             {
-                Update updateEvent = request.ToObject<Update>();
-                await _botManager.RespondAsync(updateEvent);
+                if (update != null)
+                {
+                    await _botManager.RespondAsync(update);
+                }
             }
             catch (Exception e)
             {
