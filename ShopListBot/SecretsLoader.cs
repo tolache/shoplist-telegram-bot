@@ -1,17 +1,23 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Amazon.Lambda.Core;
 
 namespace ShopListBot
 {
-    public class SecretsLoader
+    public static class SecretsLoader
     {
         private const string TelegramBotTokenFile = @"Secrets/telegramBotToken.txt";
         private const string SpreadsheetIdFile = @"Secrets/spreadsheetId.txt";
         private const string GoogleCredentialsFile = @"Secrets/googleSheetsCredentials.json";
         
-        public string GetSecret(SecretType secretType)
+        public enum SecretType
+        {
+            TelegramBotToken,
+            GoogleSpreadsheetId,
+            GoogleCredentials,
+        }
+        
+        public static string GetSecret(SecretType secretType)
         {
             string secret;
             string secretFile = secretType switch
@@ -41,12 +47,5 @@ namespace ShopListBot
             }
             return secret;
         }
-    }
-
-    public enum SecretType
-    {
-        TelegramBotToken,
-        GoogleSpreadsheetId,
-        GoogleCredentials,
     }
 }

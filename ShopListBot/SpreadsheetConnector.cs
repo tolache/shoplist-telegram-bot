@@ -19,7 +19,7 @@ namespace ShopListBot
 
         public SpreadsheetConnector()
         {
-            _spreadsheetId = new SecretsLoader().GetSecret(SecretType.GoogleSpreadsheetId);
+            _spreadsheetId = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleSpreadsheetId);
             ConnectToGoogle();
         }
 
@@ -43,7 +43,7 @@ namespace ShopListBot
 
         private void ConnectToGoogle()
         {
-            string credentialString = new SecretsLoader().GetSecret(SecretType.GoogleCredentials);
+            string credentialString = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleCredentials);
             GoogleCredential credential = GoogleCredential.FromJson(credentialString).CreateScoped(_scopes);
 
             _sheetsService = new SheetsService(new BaseClientService.Initializer()

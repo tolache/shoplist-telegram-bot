@@ -16,7 +16,7 @@ namespace ShopListBot
 
         public BotManager()
         {
-            string token = new SecretsLoader().GetSecret(SecretType.TelegramBotToken);
+            string token = SecretsLoader.GetSecret(SecretsLoader.SecretType.TelegramBotToken);
             _botClient = new TelegramBotClient(token);
         }
 
