@@ -14,6 +14,7 @@ namespace ShopListBot
         private readonly string _applicationName = "ShopListBot";
         private readonly string _spreadsheetId;
         private readonly CellRange _itemsLocation = new CellRange("items", "A2", "B");
+        private readonly CellRange _usersLocation = new CellRange("users", "A2", "A");
         private SheetsService _sheetsService;
 
         public SpreadsheetConnector()
@@ -24,14 +25,7 @@ namespace ShopListBot
 
         public IList<IList<object>> ReadItems()
         {
-            
-            IList<IList<object>> itemValues = ReadRange(_itemsLocation);
-            if (itemValues == null)
-            {
-                throw new ArgumentException($"Couldn't get any data from range '{_itemsLocation}'.");
-            }
-
-            return itemValues;
+            return ReadRange(_itemsLocation);
         }
 
         private IList<IList<object>> ReadRange(CellRange range)
@@ -40,6 +34,10 @@ namespace ShopListBot
                 _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range.ToString());
             
             ValueRange response = request.Execute();
+            if (response == null)
+            {
+                throw new ArgumentException($"Couldn't get any data from range '{range}'.");
+            }
             return response.Values;
         }
 

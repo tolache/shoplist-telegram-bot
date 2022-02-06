@@ -28,7 +28,7 @@ namespace ShopListBot
             Message message = update.Message;
             User user = message.From;
             LambdaLogger.Log($"Received message from {message.Chat.Id}");
-            
+
             string replyText = $"I received: {message.Text} from @{user.Username} (id:{user.Id})";
 
             IList<ShopListItem> items = new List<ShopListItem>();
