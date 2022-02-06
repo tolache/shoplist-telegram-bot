@@ -7,13 +7,10 @@ namespace ShopListBot
     {
         public IList<ShopListItem> Items => GetItems();
 
-        private readonly SpreadsheetConnector _spreadsheetConnector = new SpreadsheetConnector();
-
         private IList<ShopListItem> GetItems()
         {
             IList<ShopListItem> items = new List<ShopListItem>();
-
-            IList<IList<object>> itemValues = _spreadsheetConnector.ReadItems();
+            IList<IList<object>> itemValues = SpreadsheetConnector.ReadItems();
 
             foreach (IList<object> row in itemValues)
             {

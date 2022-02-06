@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
@@ -8,30 +7,36 @@ using Google.Apis.Sheets.v4.Data;
 
 namespace ShopListBot
 {
-    public class SpreadsheetConnector
+    public static class SpreadsheetConnector
     {
-        private readonly string[] _scopes = { SheetsService.Scope.Spreadsheets };
-        private readonly string _applicationName = "ShopListBot";
-        private readonly string _spreadsheetId;
-        private readonly CellRange _itemsLocation = new CellRange("items", "A2", "B");
-        private readonly CellRange _usersLocation = new CellRange("users", "A2", "A");
-        private SheetsService _sheetsService;
+        private const string ApplicationName = "ShopListBot";
+        private static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
+        private static readonly string SpreadsheetId;
+        private static readonly CellRange ItemsLocation = new CellRange("items", "A2", "B");
+        private static readonly CellRange UsersLocation = new CellRange("users", "A2", "A");
+        private static SheetsService _sheetsService;
 
-        public SpreadsheetConnector()
+        static SpreadsheetConnector()
         {
-            _spreadsheetId = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleSpreadsheetId);
+            SpreadsheetId = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleSpreadsheetId);
             ConnectToGoogle();
         }
 
-        public IList<IList<object>> ReadItems()
+        public static IList<IList<object>> ReadItems()
         {
-            return ReadRange(_itemsLocation);
+            return ReadRange(ItemsLocation);
+        }
+        
+        
+        public static IList<IList<object>> ReadUsers()
+        {
+            return ReadRange(UsersLocation);
         }
 
-        private IList<IList<object>> ReadRange(CellRange range)
+        private static IList<IList<object>> ReadRange(CellRange range)
         {
             SpreadsheetsResource.ValuesResource.GetRequest request =
-                _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range.ToString());
+                _sheetsService.Spreadsheets.Values.Get(SpreadsheetId, range.ToString());
             
             ValueRange response = request.Execute();
             if (response == null)
@@ -41,15 +46,15 @@ namespace ShopListBot
             return response.Values;
         }
 
-        private void ConnectToGoogle()
+        private static void ConnectToGoogle()
         {
             string credentialString = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleCredentials);
-            GoogleCredential credential = GoogleCredential.FromJson(credentialString).CreateScoped(_scopes);
+            GoogleCredential credential = GoogleCredential.FromJson(credentialString).CreateScoped(Scopes);
 
             _sheetsService = new SheetsService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = _applicationName,
+                ApplicationName = ApplicationName,
             });
         }
     }
