@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.Lambda.Core;
 using Telegram.Bot;
@@ -33,8 +34,15 @@ namespace ShopListBot
             LambdaLogger.Log($"Received message from {message.Chat.Id}");
             if (!CheckUserAuthorized(fromUser.Username)) return;
 
-            string replyText = $"I received: {message.Text} from @{fromUser.Username} (id:{fromUser.Id})";
+            string replyText = $"Received: '{message.Text}' from @{fromUser.Username}";
+            
+            // Add item to shopping list
+            IList<string> firstTwoUserWords = message.Text.Split(" ").Take(2).ToList();
+            Int64.TryParse(firstTwoUserWords[0], out long itemId);
+            ShopListItem itemToAdd = new ShopListItem(itemId, firstTwoUserWords[1]);
+            replyText += Environment.NewLine + _shopList.AddItem(itemToAdd);
 
+            // Read items from the items sheet
             IList<ShopListItem> items = new List<ShopListItem>();
             try
             {
@@ -59,6 +67,7 @@ namespace ShopListBot
                 keyboardMarkup = new ReplyKeyboardMarkup(buttonBoard);
             }
 
+            // Reply to the user
             switch (message.Type)
             {
                 case MessageType.Text: ;

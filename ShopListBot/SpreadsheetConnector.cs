@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
+using Newtonsoft.Json;
 
 namespace ShopListBot
 {
@@ -12,14 +15,16 @@ namespace ShopListBot
         private const string ApplicationName = "ShopListBot";
         private static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
         private static readonly string SpreadsheetId;
-        private static readonly CellRange ItemsLocation = new CellRange("items", "A2", "B");
-        private static readonly CellRange UsersLocation = new CellRange("users", "A2", "A");
+        private static readonly CellRange ItemsLocation;
+        private static readonly CellRange UsersLocation;
         private static SheetsService _sheetsService;
 
         static SpreadsheetConnector()
         {
             SpreadsheetId = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleSpreadsheetId);
-            ConnectToGoogle();
+            ItemsLocation = new CellRange("items", new Cell("A",2), new Cell("B"));
+            UsersLocation = new CellRange("users", new Cell("A",2), new Cell("A"));
+            InitSheetsService();
         }
 
         public static IList<IList<object>> ReadItems()
@@ -46,7 +51,44 @@ namespace ShopListBot
             return response.Values;
         }
 
-        private static void ConnectToGoogle()
+        public static string UpdateItems(IList<IList<string>> items)
+        {
+            return WriteRange(items, ItemsLocation);
+        }
+        
+        private static string WriteRange(IList<IList<string>> data, CellRange range)
+        {
+            IList<IList<object>> objectsData = new List<IList<object>>();
+            foreach (IList<string> row in data)
+            {
+                objectsData.Add(row.Cast<object>().ToList());
+            }
+
+            string valueInputOption = "USER_ENTERED";
+            
+            List<ValueRange> updateData = new List<ValueRange>();
+            ValueRange dataValueRange = new ValueRange
+            {
+                Range = range.ToString(),
+                Values = objectsData
+            };
+            updateData.Add(dataValueRange);
+
+            BatchUpdateValuesRequest requestBody = new BatchUpdateValuesRequest
+            {
+                ValueInputOption = valueInputOption,
+                Data = updateData
+            };
+
+            SpreadsheetsResource.ValuesResource.BatchUpdateRequest? request =
+                _sheetsService.Spreadsheets.Values.BatchUpdate(requestBody, SpreadsheetId);
+
+            BatchUpdateValuesResponse response = request.Execute();
+
+            return "Response JSON: " + Environment.NewLine + JsonConvert.SerializeObject(response);
+        }
+
+        private static void InitSheetsService()
         {
             string credentialString = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleCredentials);
             GoogleCredential credential = GoogleCredential.FromJson(credentialString).CreateScoped(Scopes);

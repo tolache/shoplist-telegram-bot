@@ -23,5 +23,19 @@ namespace ShopListBot
 
             return items;
         }
+
+        public string AddItem(ShopListItem newItem)
+        {
+            IList<IList<string>> dataToSubmit = new List<IList<string>>();
+            
+            foreach (ShopListItem existingItem in Items)
+            {
+                dataToSubmit.Add(new List<string> {existingItem.Id.ToString(), existingItem.Name});
+            }
+            
+            dataToSubmit.Add(new List<string> { newItem.Id.ToString(), newItem.Name });
+            
+            return SpreadsheetConnector.UpdateItems(dataToSubmit);
+        }
     }
 }

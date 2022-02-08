@@ -2,24 +2,20 @@
 {
     public class CellRange
     {
-        public string Sheet => _sheet;
-        public string FromCell => _fromCell;
-        public string ToCell => _toCell;
+        public string Sheet { get; set; }
+        public Cell FromCell { get; set; }
+        public Cell ToCell { get; set; }
 
-        private string _sheet;
-        private string _fromCell;
-        private string _toCell;
-
-        public CellRange(string sheet, string fromCell, string toCell)
+        public CellRange(string sheet, Cell fromCell, Cell toCell)
         {
-            _sheet = sheet;
-            _fromCell = fromCell;
-            _toCell = toCell;
+            Sheet = sheet;
+            FromCell = fromCell;
+            ToCell = toCell;
         }
         
         public override string ToString()
         {
-            return $"{_sheet}!{_fromCell}:{_toCell}";
+            return $"{Sheet}!{FromCell}:{ToCell}";
         }
     }
 }
