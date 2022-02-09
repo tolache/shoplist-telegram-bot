@@ -84,7 +84,7 @@ namespace ShopListBot
 
             BatchUpdateValuesResponse response = request.Execute();
 
-            return "Response JSON: " + Environment.NewLine + JsonConvert.SerializeObject(response);
+            return JsonConvert.SerializeObject(response);
         }
 
         private static void InitSheetsService()
