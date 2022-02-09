@@ -31,11 +31,15 @@ namespace ShopListBot
             IList<string> items = new List<string>();
             IList<IList<object>> itemValues = SpreadsheetConnector.ReadItems();
 
-            foreach (IList<object> row in itemValues)
+            // ReSharper disable once ConstantConditionalAccessQualifier
+            if (itemValues?.Count > 0)
             {
-                if (!String.IsNullOrWhiteSpace(row[0].ToString()))
+                foreach (IList<object> row in itemValues)
                 {
-                    items.Add(row[0].ToString());
+                    if (!String.IsNullOrWhiteSpace(row[0].ToString()))
+                    {
+                        items.Add(row[0].ToString());
+                    }
                 }
             }
 
