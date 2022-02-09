@@ -3,10 +3,10 @@
     public class CellRange
     {
         public string Sheet { get; set; }
-        public Cell FromCell { get; set; }
-        public Cell ToCell { get; set; }
+        public string FromCell { get; set; }
+        public string ToCell { get; set; }
 
-        public CellRange(string sheet, Cell fromCell, Cell toCell)
+        public CellRange(string sheet, string fromCell, string toCell)
         {
             Sheet = sheet;
             FromCell = fromCell;

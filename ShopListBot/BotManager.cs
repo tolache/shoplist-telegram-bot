@@ -32,18 +32,18 @@ namespace ShopListBot
             if (message == null || fromUser == null) return;
 
             LambdaLogger.Log($"Received message from {message.Chat.Id}");
-            if (!CheckUserAuthorized(fromUser.Username)) return;
+            if (!CheckUserAuthorized(fromUser.Username))
+            {
+                LambdaLogger.Log($"WARNING! Unauthorized user '@{fromUser.Username}' tried to use the bot");
+                return;
+            }
 
             string replyText = $"Received: '{message.Text}' from @{fromUser.Username}";
             
-            // Add item to shopping list
-            IList<string> firstTwoUserWords = message.Text.Split(" ").Take(2).ToList();
-            Int64.TryParse(firstTwoUserWords[0], out long itemId);
-            ShopListItem itemToAdd = new ShopListItem(itemId, firstTwoUserWords[1]);
-            replyText += Environment.NewLine + _shopList.AddItem(itemToAdd);
+            replyText = AddItemsToShopList(replyText, message);
 
             // Read items from the items sheet
-            IList<ShopListItem> items = new List<ShopListItem>();
+            IList<string> items = new List<string>();
             try
             {
                 items = _shopList.Items;
@@ -59,10 +59,9 @@ namespace ShopListBot
             if (items.Count > 0)
             {
                 IList<IList<KeyboardButton>> buttonBoard = new List<IList<KeyboardButton>>();
-                foreach (ShopListItem item in items)
+                foreach (string item in items)
                 {
-                    buttonBoard.Add(new List<KeyboardButton>
-                        { new KeyboardButton(item.Id.ToString()), new KeyboardButton(item.Name) });
+                    buttonBoard.Add(new List<KeyboardButton> { new KeyboardButton(item) });
                 }
                 keyboardMarkup = new ReplyKeyboardMarkup(buttonBoard);
             }
@@ -77,6 +76,24 @@ namespace ShopListBot
                         replyMarkup: keyboardMarkup);
                     break;
             }
+        }
+
+        private string AddItemsToShopList(string replyText, Message message)
+        {
+            LambdaLogger.Log($"Trying to add items from message '{message.Text}'...");
+            try
+            {
+                string addItemsResponse = _shopList.AddItems(message.Text);
+                LambdaLogger.Log($"Response: {addItemsResponse}");
+            }
+            catch (Exception e)
+            {
+                string errorMessage = "Failed to add items to Google Sheets: " + e;
+                LambdaLogger.Log(errorMessage);
+                replyText += Environment.NewLine + errorMessage;
+            }
+
+            return replyText;
         }
 
         private bool CheckUserAuthorized(string? username)

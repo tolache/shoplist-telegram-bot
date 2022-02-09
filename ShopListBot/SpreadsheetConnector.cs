@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Google.Apis.Auth.OAuth2;
@@ -22,8 +21,8 @@ namespace ShopListBot
         static SpreadsheetConnector()
         {
             SpreadsheetId = SecretsLoader.GetSecret(SecretsLoader.SecretType.GoogleSpreadsheetId);
-            ItemsLocation = new CellRange("items", new Cell("A",2), new Cell("B"));
-            UsersLocation = new CellRange("users", new Cell("A",2), new Cell("A"));
+            ItemsLocation = new CellRange("items", "A2", "A");
+            UsersLocation = new CellRange("users", "A2", "A");
             InitSheetsService();
         }
 

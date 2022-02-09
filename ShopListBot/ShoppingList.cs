@@ -1,41 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ShopListBot
 {
     public class ShoppingList
     {
-        public IList<ShopListItem> Items => GetItems();
+        public IList<string> Items => GetItems();
 
-        private IList<ShopListItem> GetItems()
+        public string AddItems(string message)
         {
-            IList<ShopListItem> items = new List<ShopListItem>();
+            IList<string> newItems = ParseItems(message);
+            IList<IList<string>> dataToSubmit = new List<IList<string>>();
+            
+            foreach (string existingItem in Items)
+            {
+                dataToSubmit.Add(new List<string> {existingItem});
+            }
+            
+            foreach (string newItem in newItems)
+            {
+                dataToSubmit.Add(new List<string> {newItem});
+            }
+            
+            return SpreadsheetConnector.UpdateItems(dataToSubmit);
+        }
+
+        private IList<string> GetItems()
+        {
+            IList<string> items = new List<string>();
             IList<IList<object>> itemValues = SpreadsheetConnector.ReadItems();
 
             foreach (IList<object> row in itemValues)
             {
-                bool idIsValid = Int64.TryParse(row[0].ToString(), out long id);
-                if (idIsValid && !String.IsNullOrWhiteSpace(row[1].ToString()))
+                if (!String.IsNullOrWhiteSpace(row[0].ToString()))
                 {
-                    items.Add(new ShopListItem(id, row[1].ToString()));
+                    items.Add(row[0].ToString());
                 }
             }
 
             return items;
         }
 
-        public string AddItem(ShopListItem newItem)
+        private IList<string> ParseItems(string message)
         {
-            IList<IList<string>> dataToSubmit = new List<IList<string>>();
-            
-            foreach (ShopListItem existingItem in Items)
-            {
-                dataToSubmit.Add(new List<string> {existingItem.Id.ToString(), existingItem.Name});
-            }
-            
-            dataToSubmit.Add(new List<string> { newItem.Id.ToString(), newItem.Name });
-            
-            return SpreadsheetConnector.UpdateItems(dataToSubmit);
+            char[] delimiters = { ',', ';', '\n' };
+
+            IList<string> items = message.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return items;
         }
     }
 }
