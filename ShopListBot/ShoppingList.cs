@@ -51,7 +51,12 @@ namespace ShopListBot
             char[] delimiters = { ',', ';', '\n' };
 
             IList<string> items = message.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList();
-            return items;
+            IList<string> trimmedItems = new List<string>();
+            foreach (string item in items)
+            {
+                trimmedItems.Add(item.Trim());
+            }
+            return trimmedItems;
         }
     }
 }
